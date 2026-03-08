@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_1"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="PipelineWydatkow" name="Pełny pipeline przetwarzania wydatków" isExecutable="false">
+
+    <!-- =============================== -->
+    <!-- FAZA 1: ŁADOWANIE DANYCH Z JSON -->
+    <!-- =============================== -->
+
+    <bpmn:startEvent id="Start" name="Start aplikacji">
+      <bpmn:outgoing>Flow_Start_Fetch</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="FetchJSON" name="fetch(wydatki.json)&#10;(HTTP GET z public/)">
+      <bpmn:incoming>Flow_Start_Fetch</bpmn:incoming>
+      <bpmn:outgoing>Flow_Fetch_Parse</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:boundaryEvent id="FetchError" name="Błąd sieci / 404" attachedToRef="FetchJSON">
+      <bpmn:outgoing>Flow_Fetch_Err</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorDef_Fetch" />
+    </bpmn:boundaryEvent>
+
+    <bpmn:task id="ParseJSON" name="odpowiedz.json()&#10;(parsowanie JSON → JS)">
+      <bpmn:incoming>Flow_Fetch_Parse</bpmn:incoming>
+      <bpmn:outgoing>Flow_Parse_Validate</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:exclusiveGateway id="ValidateGw" name="Array.isArray?">
+      <bpmn:incoming>Flow_Parse_Validate</bpmn:incoming>
+      <bpmn:outgoing>Flow_Valid_OK</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Valid_Err</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:endEvent id="EndError" name="Błąd ładowania&#10;(setBladLadowania)">
+      <bpmn:incoming>Flow_Valid_Err</bpmn:incoming>
+      <bpmn:incoming>Flow_Fetch_Err</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorDef_End" />
+    </bpmn:endEvent>
+
+    <bpmn:task id="Normalize" name="suroweDane.map(normalizujWydatek)&#10;(id, nazwa, kategoria,&#10;kwota, metodaPlatnosci, data)">
+      <bpmn:incoming>Flow_Valid_OK</bpmn:incoming>
+      <bpmn:outgoing>Flow_Norm_LSCheck</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- ================================= -->
+    <!-- FAZA 2: MERGE Z LOCAL STORAGE     -->
+    <!-- ================================= -->
+
+    <bpmn:exclusiveGateway id="LSCheckGw" name="localStorage&#10;istnieje?">
+      <bpmn:incoming>Flow_Norm_LSCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_LS_Yes</bpmn:outgoing>
+      <bpmn:outgoing>Flow_LS_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="ParseLS" name="JSON.parse(localStorage)&#10;→ map(normalizujWydatek)">
+      <bpmn:incoming>Flow_LS_Yes</bpmn:incoming>
+      <bpmn:outgoing>Flow_LS_Merge</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:exclusiveGateway id="MergeGw" name="Merge">
+      <bpmn:incoming>Flow_LS_Merge</bpmn:incoming>
+      <bpmn:incoming>Flow_LS_No</bpmn:incoming>
+      <bpmn:outgoing>Flow_Merge_SetState</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="SetState" name="setListaWydatkow(dane)&#10;setDaneFabryczne(dane)&#10;setCzyDaneZaladowane(true)">
+      <bpmn:incoming>Flow_Merge_SetState</bpmn:incoming>
+      <bpmn:outgoing>Flow_State_UserAction</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- ======================================== -->
+    <!-- FAZA 3: INTERAKCJA UŻYTKOWNIKA           -->
+    <!-- ======================================== -->
+
+    <bpmn:exclusiveGateway id="UserActionGw" name="Akcja użytkownika">
+      <bpmn:incoming>Flow_State_UserAction</bpmn:incoming>
+      <bpmn:incoming>Flow_Loop_Back</bpmn:incoming>
+      <bpmn:outgoing>Flow_Action_Filter</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Action_Add</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Action_Reset</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:task id="ChangeFilter" name="obsluzZmianeFiltru()&#10;(setFiltry)">
+      <bpmn:incoming>Flow_Action_Filter</bpmn:incoming>
+      <bpmn:outgoing>Flow_Filter_Pipeline</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="AddExpense" name="dodajWydatek()&#10;(nowy rekord + auto ID)">
+      <bpmn:incoming>Flow_Action_Add</bpmn:incoming>
+      <bpmn:outgoing>Flow_Add_Persist</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="PersistLS" name="localStorage.setItem(&#10;JSON.stringify(listaWydatkow))">
+      <bpmn:incoming>Flow_Add_Persist</bpmn:incoming>
+      <bpmn:outgoing>Flow_Persist_Pipeline</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="ResetData" name="resetujDoDanychFabrycznych()&#10;(przywróć JSON + usuń LS)">
+      <bpmn:incoming>Flow_Action_Reset</bpmn:incoming>
+      <bpmn:outgoing>Flow_Reset_Pipeline</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:exclusiveGateway id="PrePipelineGw" name="Wejście pipeline">
+      <bpmn:incoming>Flow_Filter_Pipeline</bpmn:incoming>
+      <bpmn:incoming>Flow_Persist_Pipeline</bpmn:incoming>
+      <bpmn:incoming>Flow_Reset_Pipeline</bpmn:incoming>
+      <bpmn:outgoing>Flow_Pre_K1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- ==================================== -->
+    <!-- FAZA 4: PIPELINE (useMemo)           -->
+    <!-- ==================================== -->
+
+    <bpmn:task id="Krok1" name="filtrujPoNazwie&#10;(filtr tekstowy po nazwie)">
+      <bpmn:incoming>Flow_Pre_K1</bpmn:incoming>
+      <bpmn:outgoing>Flow_K1_K2</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Krok2" name="filtrujPoKategorii&#10;(filtr po kategorii)">
+      <bpmn:incoming>Flow_K1_K2</bpmn:incoming>
+      <bpmn:outgoing>Flow_K2_K3</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Krok3" name="filtrujPoMetodziePlatnosci&#10;(filtr metody płatności)">
+      <bpmn:incoming>Flow_K2_K3</bpmn:incoming>
+      <bpmn:outgoing>Flow_K3_K4</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Krok4" name="filtrujPoZakresieKwot&#10;(filtr min/max kwoty)">
+      <bpmn:incoming>Flow_K3_K4</bpmn:incoming>
+      <bpmn:outgoing>Flow_K4_K5</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Krok5" name="filtrujPoZakresieDat&#10;(filtr zakresu dat)">
+      <bpmn:incoming>Flow_K4_K5</bpmn:incoming>
+      <bpmn:outgoing>Flow_K5_K6</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Krok6" name="sortujWydatki&#10;(sortowanie po polu i kierunku)">
+      <bpmn:incoming>Flow_K5_K6</bpmn:incoming>
+      <bpmn:outgoing>Flow_K6_Fork</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:parallelGateway id="Fork" name="Fork&#10;(równoległe przetwarzanie)">
+      <bpmn:incoming>Flow_K6_Fork</bpmn:incoming>
+      <bpmn:outgoing>Flow_Fork_K7</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Fork_Agr</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Fork_Stat</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Fork_Wykres</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:task id="Krok7" name="mapujDoWidoku&#10;(mapowanie do prezentacji UI)">
+      <bpmn:incoming>Flow_Fork_K7</bpmn:incoming>
+      <bpmn:outgoing>Flow_K7_Join</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Agregacja" name="agregujPoKategorii&#10;(sumy wydatków w kategoriach)">
+      <bpmn:incoming>Flow_Fork_Agr</bpmn:incoming>
+      <bpmn:outgoing>Flow_Agr_LK</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Agr_Dash</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="LiczbaKategorii" name="obliczLiczbeKategorii">
+      <bpmn:incoming>Flow_Agr_LK</bpmn:incoming>
+      <bpmn:outgoing>Flow_LK_Join</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Statystyki" name="obliczStatystyki&#10;(suma, średnia, min, max)">
+      <bpmn:incoming>Flow_Fork_Stat</bpmn:incoming>
+      <bpmn:outgoing>Flow_Stat_Join</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="DaneWykresu" name="przygotujDaneDoWykresu&#10;(dane wykresu słupkowego)">
+      <bpmn:incoming>Flow_Fork_Wykres</bpmn:incoming>
+      <bpmn:outgoing>Flow_Wykres_Dash</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="DashboardCalc" name="obliczDaneDashboardu&#10;(podsumowanie dashboardu)">
+      <bpmn:incoming>Flow_Wykres_Dash</bpmn:incoming>
+      <bpmn:incoming>Flow_Agr_Dash</bpmn:incoming>
+      <bpmn:outgoing>Flow_Dash_Join</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:parallelGateway id="Join" name="Join">
+      <bpmn:incoming>Flow_K7_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_LK_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_Stat_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_Dash_Join</bpmn:incoming>
+      <bpmn:outgoing>Flow_Join_Render</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- ======================================== -->
+    <!-- FAZA 5: RENDEROWANIE UI                  -->
+    <!-- ======================================== -->
+
+    <bpmn:task id="RenderUI" name="Renderuj widoki React&#10;(Wydatki, Statystyki,&#10;Wykres, Dashboard)">
+      <bpmn:incoming>Flow_Join_Render</bpmn:incoming>
+      <bpmn:outgoing>Flow_Loop_Back</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- =============================== -->
+    <!-- SEQUENCE FLOWS                  -->
+    <!-- =============================== -->
+
+    <!-- Faza 1: Ładowanie -->
+    <bpmn:sequenceFlow id="Flow_Start_Fetch" sourceRef="Start" targetRef="FetchJSON" />
+    <bpmn:sequenceFlow id="Flow_Fetch_Parse" sourceRef="FetchJSON" targetRef="ParseJSON" />
+    <bpmn:sequenceFlow id="Flow_Parse_Validate" sourceRef="ParseJSON" targetRef="ValidateGw" />
+    <bpmn:sequenceFlow id="Flow_Valid_OK" name="TAK" sourceRef="ValidateGw" targetRef="Normalize" />
+    <bpmn:sequenceFlow id="Flow_Valid_Err" name="NIE" sourceRef="ValidateGw" targetRef="EndError" />
+    <bpmn:sequenceFlow id="Flow_Fetch_Err" sourceRef="FetchError" targetRef="EndError" />
+
+    <!-- Faza 2: LocalStorage -->
+    <bpmn:sequenceFlow id="Flow_Norm_LSCheck" sourceRef="Normalize" targetRef="LSCheckGw" />
+    <bpmn:sequenceFlow id="Flow_LS_Yes" name="TAK" sourceRef="LSCheckGw" targetRef="ParseLS" />
+    <bpmn:sequenceFlow id="Flow_LS_No" name="NIE" sourceRef="LSCheckGw" targetRef="MergeGw" />
+    <bpmn:sequenceFlow id="Flow_LS_Merge" sourceRef="ParseLS" targetRef="MergeGw" />
+    <bpmn:sequenceFlow id="Flow_Merge_SetState" sourceRef="MergeGw" targetRef="SetState" />
+
+    <!-- Faza 3: Akcja użytkownika -->
+    <bpmn:sequenceFlow id="Flow_State_UserAction" sourceRef="SetState" targetRef="UserActionGw" />
+    <bpmn:sequenceFlow id="Flow_Action_Filter" name="Zmiana filtrów" sourceRef="UserActionGw" targetRef="ChangeFilter" />
+    <bpmn:sequenceFlow id="Flow_Action_Add" name="Dodaj wydatek" sourceRef="UserActionGw" targetRef="AddExpense" />
+    <bpmn:sequenceFlow id="Flow_Action_Reset" name="Reset fabryczny" sourceRef="UserActionGw" targetRef="ResetData" />
+    <bpmn:sequenceFlow id="Flow_Filter_Pipeline" sourceRef="ChangeFilter" targetRef="PrePipelineGw" />
+    <bpmn:sequenceFlow id="Flow_Add_Persist" sourceRef="AddExpense" targetRef="PersistLS" />
+    <bpmn:sequenceFlow id="Flow_Persist_Pipeline" sourceRef="PersistLS" targetRef="PrePipelineGw" />
+    <bpmn:sequenceFlow id="Flow_Reset_Pipeline" sourceRef="ResetData" targetRef="PrePipelineGw" />
+
+    <!-- Faza 4: Pipeline -->
+    <bpmn:sequenceFlow id="Flow_Pre_K1" sourceRef="PrePipelineGw" targetRef="Krok1" />
+    <bpmn:sequenceFlow id="Flow_K1_K2" sourceRef="Krok1" targetRef="Krok2" />
+    <bpmn:sequenceFlow id="Flow_K2_K3" sourceRef="Krok2" targetRef="Krok3" />
+    <bpmn:sequenceFlow id="Flow_K3_K4" sourceRef="Krok3" targetRef="Krok4" />
+    <bpmn:sequenceFlow id="Flow_K4_K5" sourceRef="Krok4" targetRef="Krok5" />
+    <bpmn:sequenceFlow id="Flow_K5_K6" sourceRef="Krok5" targetRef="Krok6" />
+    <bpmn:sequenceFlow id="Flow_K6_Fork" sourceRef="Krok6" targetRef="Fork" />
+    <bpmn:sequenceFlow id="Flow_Fork_K7" sourceRef="Fork" targetRef="Krok7" />
+    <bpmn:sequenceFlow id="Flow_Fork_Agr" sourceRef="Fork" targetRef="Agregacja" />
+    <bpmn:sequenceFlow id="Flow_Fork_Stat" sourceRef="Fork" targetRef="Statystyki" />
+    <bpmn:sequenceFlow id="Flow_Fork_Wykres" sourceRef="Fork" targetRef="DaneWykresu" />
+    <bpmn:sequenceFlow id="Flow_Agr_LK" sourceRef="Agregacja" targetRef="LiczbaKategorii" />
+    <bpmn:sequenceFlow id="Flow_Agr_Dash" sourceRef="Agregacja" targetRef="DashboardCalc" />
+    <bpmn:sequenceFlow id="Flow_Wykres_Dash" sourceRef="DaneWykresu" targetRef="DashboardCalc" />
+    <bpmn:sequenceFlow id="Flow_K7_Join" sourceRef="Krok7" targetRef="Join" />
+    <bpmn:sequenceFlow id="Flow_LK_Join" sourceRef="LiczbaKategorii" targetRef="Join" />
+    <bpmn:sequenceFlow id="Flow_Stat_Join" sourceRef="Statystyki" targetRef="Join" />
+    <bpmn:sequenceFlow id="Flow_Dash_Join" sourceRef="DashboardCalc" targetRef="Join" />
+
+    <!-- Faza 5: Render + pętla -->
+    <bpmn:sequenceFlow id="Flow_Join_Render" sourceRef="Join" targetRef="RenderUI" />
+    <bpmn:sequenceFlow id="Flow_Loop_Back" sourceRef="RenderUI" targetRef="UserActionGw" />
+
+  </bpmn:process>
+
+  <!-- ============================================ -->
+  <!-- DIAGRAM — LAYOUT PIONOWY (top → bottom)      -->
+  <!-- Oś główna: x=500, flow w dół po y            -->
+  <!-- ============================================ -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="PipelineWydatkow">
+
+      <!-- ========== FAZA 1: ŁADOWANIE (y: 60–560) ========== -->
+
+      <!-- Start  cx=500 -->
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
+        <dc:Bounds x="482" y="60" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="462" y="103" width="76" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- FetchJSON -->
+      <bpmndi:BPMNShape id="Shape_FetchJSON" bpmnElement="FetchJSON">
+        <dc:Bounds x="410" y="140" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- FetchError (boundary – prawy dolny róg FetchJSON) -->
+      <bpmndi:BPMNShape id="Shape_FetchError" bpmnElement="FetchError">
+        <dc:Bounds x="572" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="610" y="203" width="85" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ParseJSON -->
+      <bpmndi:BPMNShape id="Shape_ParseJSON" bpmnElement="ParseJSON">
+        <dc:Bounds x="410" y="260" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- ValidateGw -->
+      <bpmndi:BPMNShape id="Shape_ValidateGw" bpmnElement="ValidateGw" isMarkerVisible="true">
+        <dc:Bounds x="475" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="393" width="80" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- EndError (na prawo od osi) -->
+      <bpmndi:BPMNShape id="Shape_EndError" bpmnElement="EndError">
+        <dc:Bounds x="722" y="322" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="690" y="365" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Normalize -->
+      <bpmndi:BPMNShape id="Shape_Normalize" bpmnElement="Normalize">
+        <dc:Bounds x="400" y="480" width="200" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- ========== FAZA 2: LOCAL STORAGE (y: 610–900) ========== -->
+
+      <!-- LSCheckGw -->
+      <bpmndi:BPMNShape id="Shape_LSCheckGw" bpmnElement="LSCheckGw" isMarkerVisible="true">
+        <dc:Bounds x="475" y="610" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="622" width="80" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ParseLS (na lewo od osi) -->
+      <bpmndi:BPMNShape id="Shape_ParseLS" bpmnElement="ParseLS">
+        <dc:Bounds x="220" y="690" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- MergeGw -->
+      <bpmndi:BPMNShape id="Shape_MergeGw" bpmnElement="MergeGw" isMarkerVisible="true">
+        <dc:Bounds x="475" y="790" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="808" width="40" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- SetState -->
+      <bpmndi:BPMNShape id="Shape_SetState" bpmnElement="SetState">
+        <dc:Bounds x="400" y="890" width="200" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- ========== FAZA 3: AKCJA UŻYTKOWNIKA (y: 1020–1280) ========== -->
+
+      <!-- UserActionGw -->
+      <bpmndi:BPMNShape id="Shape_UserActionGw" bpmnElement="UserActionGw" isMarkerVisible="true">
+        <dc:Bounds x="475" y="1020" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="1038" width="90" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ChangeFilter (lewa gałąź) -->
+      <bpmndi:BPMNShape id="Shape_ChangeFilter" bpmnElement="ChangeFilter">
+        <dc:Bounds x="200" y="1120" width="170" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- AddExpense (środkowa gałąź) -->
+      <bpmndi:BPMNShape id="Shape_AddExpense" bpmnElement="AddExpense">
+        <dc:Bounds x="415" y="1120" width="170" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- PersistLS (pod AddExpense) -->
+      <bpmndi:BPMNShape id="Shape_PersistLS" bpmnElement="PersistLS">
+        <dc:Bounds x="415" y="1220" width="170" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- ResetData (prawa gałąź) -->
+      <bpmndi:BPMNShape id="Shape_ResetData" bpmnElement="ResetData">
+        <dc:Bounds x="640" y="1120" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- PrePipelineGw -->
+      <bpmndi:BPMNShape id="Shape_PrePipelineGw" bpmnElement="PrePipelineGw" isMarkerVisible="true">
+        <dc:Bounds x="475" y="1340" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="1358" width="85" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ========== FAZA 4: PIPELINE (y: 1440–2400) ========== -->
+
+      <!-- Krok 1 -->
+      <bpmndi:BPMNShape id="Shape_Krok1" bpmnElement="Krok1">
+        <dc:Bounds x="410" y="1440" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- Krok 2 -->
+      <bpmndi:BPMNShape id="Shape_Krok2" bpmnElement="Krok2">
+        <dc:Bounds x="410" y="1550" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- Krok 3 -->
+      <bpmndi:BPMNShape id="Shape_Krok3" bpmnElement="Krok3">
+        <dc:Bounds x="410" y="1660" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- Krok 4 -->
+      <bpmndi:BPMNShape id="Shape_Krok4" bpmnElement="Krok4">
+        <dc:Bounds x="410" y="1770" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- Krok 5 -->
+      <bpmndi:BPMNShape id="Shape_Krok5" bpmnElement="Krok5">
+        <dc:Bounds x="410" y="1880" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- Krok 6 -->
+      <bpmndi:BPMNShape id="Shape_Krok6" bpmnElement="Krok6">
+        <dc:Bounds x="410" y="1990" width="180" height="70" />
+      </bpmndi:BPMNShape>
+
+      <!-- Fork -->
+      <bpmndi:BPMNShape id="Shape_Fork" bpmnElement="Fork">
+        <dc:Bounds x="475" y="2110" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="2118" width="110" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- === 4 gałęzie równoległe (y: 2210) === -->
+
+      <!-- Krok7 mapujDoWidoku (kol. 1, x=100) -->
+      <bpmndi:BPMNShape id="Shape_Krok7" bpmnElement="Krok7">
+        <dc:Bounds x="60" y="2210" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- Agregacja (kol. 2, x=300) -->
+      <bpmndi:BPMNShape id="Shape_Agregacja" bpmnElement="Agregacja">
+        <dc:Bounds x="280" y="2210" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- LiczbaKategorii (pod Agregacją) -->
+      <bpmndi:BPMNShape id="Shape_LiczbaKategorii" bpmnElement="LiczbaKategorii">
+        <dc:Bounds x="280" y="2320" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- Statystyki (kol. 3, x=520) -->
+      <bpmndi:BPMNShape id="Shape_Statystyki" bpmnElement="Statystyki">
+        <dc:Bounds x="510" y="2210" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- DaneWykresu (kol. 4, x=740) -->
+      <bpmndi:BPMNShape id="Shape_DaneWykresu" bpmnElement="DaneWykresu">
+        <dc:Bounds x="740" y="2210" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- DashboardCalc (pod DaneWykresu + Agregacja → x=520) -->
+      <bpmndi:BPMNShape id="Shape_DashboardCalc" bpmnElement="DashboardCalc">
+        <dc:Bounds x="640" y="2320" width="180" height="60" />
+      </bpmndi:BPMNShape>
+
+      <!-- Join -->
+      <bpmndi:BPMNShape id="Shape_Join" bpmnElement="Join">
+        <dc:Bounds x="475" y="2440" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="527" y="2458" width="24" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ========== FAZA 5: RENDER (y: 2540) ========== -->
+
+      <bpmndi:BPMNShape id="Shape_RenderUI" bpmnElement="RenderUI">
+        <dc:Bounds x="400" y="2540" width="200" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- ========================================== -->
+      <!-- EDGES (przepływy pionowe)                  -->
+      <!-- ========================================== -->
+
+      <!-- Faza 1: top → bottom -->
+      <bpmndi:BPMNEdge id="Edge_Start_Fetch" bpmnElement="Flow_Start_Fetch">
+        <di:waypoint x="500" y="96" />
+        <di:waypoint x="500" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Fetch_Parse" bpmnElement="Flow_Fetch_Parse">
+        <di:waypoint x="500" y="210" />
+        <di:waypoint x="500" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Parse_Validate" bpmnElement="Flow_Parse_Validate">
+        <di:waypoint x="500" y="330" />
+        <di:waypoint x="500" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Valid_OK" bpmnElement="Flow_Valid_OK">
+        <di:waypoint x="500" y="425" />
+        <di:waypoint x="500" y="480" />
+        <bpmndi:BPMNLabel><dc:Bounds x="505" y="445" width="30" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Valid_Err" bpmnElement="Flow_Valid_Err">
+        <di:waypoint x="525" y="400" />
+        <di:waypoint x="740" y="400" />
+        <di:waypoint x="740" y="358" />
+        <bpmndi:BPMNLabel><dc:Bounds x="620" y="382" width="30" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Fetch_Err" bpmnElement="Flow_Fetch_Err">
+        <di:waypoint x="608" y="210" />
+        <di:waypoint x="740" y="210" />
+        <di:waypoint x="740" y="322" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Faza 2: top → bottom -->
+      <bpmndi:BPMNEdge id="Edge_Norm_LSCheck" bpmnElement="Flow_Norm_LSCheck">
+        <di:waypoint x="500" y="560" />
+        <di:waypoint x="500" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_LS_Yes" bpmnElement="Flow_LS_Yes">
+        <di:waypoint x="475" y="635" />
+        <di:waypoint x="310" y="635" />
+        <di:waypoint x="310" y="690" />
+        <bpmndi:BPMNLabel><dc:Bounds x="375" y="617" width="30" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_LS_No" bpmnElement="Flow_LS_No">
+        <di:waypoint x="500" y="660" />
+        <di:waypoint x="500" y="790" />
+        <bpmndi:BPMNLabel><dc:Bounds x="505" y="720" width="30" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_LS_Merge" bpmnElement="Flow_LS_Merge">
+        <di:waypoint x="310" y="750" />
+        <di:waypoint x="310" y="815" />
+        <di:waypoint x="475" y="815" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Merge_SetState" bpmnElement="Flow_Merge_SetState">
+        <di:waypoint x="500" y="840" />
+        <di:waypoint x="500" y="890" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Faza 3: top → bottom, 3 gałęzie w bok -->
+      <bpmndi:BPMNEdge id="Edge_State_UserAction" bpmnElement="Flow_State_UserAction">
+        <di:waypoint x="500" y="970" />
+        <di:waypoint x="500" y="1020" />
+      </bpmndi:BPMNEdge>
+      <!-- Zmiana filtrów  → lewo -->
+      <bpmndi:BPMNEdge id="Edge_Action_Filter" bpmnElement="Flow_Action_Filter">
+        <di:waypoint x="475" y="1045" />
+        <di:waypoint x="285" y="1045" />
+        <di:waypoint x="285" y="1120" />
+        <bpmndi:BPMNLabel><dc:Bounds x="340" y="1027" width="75" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <!-- Dodaj wydatek → środek w dół -->
+      <bpmndi:BPMNEdge id="Edge_Action_Add" bpmnElement="Flow_Action_Add">
+        <di:waypoint x="500" y="1070" />
+        <di:waypoint x="500" y="1120" />
+        <bpmndi:BPMNLabel><dc:Bounds x="505" y="1088" width="75" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <!-- Reset → prawo -->
+      <bpmndi:BPMNEdge id="Edge_Action_Reset" bpmnElement="Flow_Action_Reset">
+        <di:waypoint x="525" y="1045" />
+        <di:waypoint x="730" y="1045" />
+        <di:waypoint x="730" y="1120" />
+        <bpmndi:BPMNLabel><dc:Bounds x="610" y="1027" width="80" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <!-- ChangeFilter → PrePipeline -->
+      <bpmndi:BPMNEdge id="Edge_Filter_Pipeline" bpmnElement="Flow_Filter_Pipeline">
+        <di:waypoint x="285" y="1180" />
+        <di:waypoint x="285" y="1365" />
+        <di:waypoint x="475" y="1365" />
+      </bpmndi:BPMNEdge>
+      <!-- AddExpense → PersistLS -->
+      <bpmndi:BPMNEdge id="Edge_Add_Persist" bpmnElement="Flow_Add_Persist">
+        <di:waypoint x="500" y="1180" />
+        <di:waypoint x="500" y="1220" />
+      </bpmndi:BPMNEdge>
+      <!-- PersistLS → PrePipeline -->
+      <bpmndi:BPMNEdge id="Edge_Persist_Pipeline" bpmnElement="Flow_Persist_Pipeline">
+        <di:waypoint x="500" y="1280" />
+        <di:waypoint x="500" y="1340" />
+      </bpmndi:BPMNEdge>
+      <!-- ResetData → PrePipeline -->
+      <bpmndi:BPMNEdge id="Edge_Reset_Pipeline" bpmnElement="Flow_Reset_Pipeline">
+        <di:waypoint x="730" y="1180" />
+        <di:waypoint x="730" y="1365" />
+        <di:waypoint x="525" y="1365" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Faza 4: Pipeline w dół -->
+      <bpmndi:BPMNEdge id="Edge_Pre_K1" bpmnElement="Flow_Pre_K1">
+        <di:waypoint x="500" y="1390" />
+        <di:waypoint x="500" y="1440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_K1_K2" bpmnElement="Flow_K1_K2">
+        <di:waypoint x="500" y="1510" />
+        <di:waypoint x="500" y="1550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_K2_K3" bpmnElement="Flow_K2_K3">
+        <di:waypoint x="500" y="1620" />
+        <di:waypoint x="500" y="1660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_K3_K4" bpmnElement="Flow_K3_K4">
+        <di:waypoint x="500" y="1730" />
+        <di:waypoint x="500" y="1770" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_K4_K5" bpmnElement="Flow_K4_K5">
+        <di:waypoint x="500" y="1840" />
+        <di:waypoint x="500" y="1880" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_K5_K6" bpmnElement="Flow_K5_K6">
+        <di:waypoint x="500" y="1950" />
+        <di:waypoint x="500" y="1990" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_K6_Fork" bpmnElement="Flow_K6_Fork">
+        <di:waypoint x="500" y="2060" />
+        <di:waypoint x="500" y="2110" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Fork → 4 gałęzie (w bok, potem w dół) -->
+      <bpmndi:BPMNEdge id="Edge_Fork_K7" bpmnElement="Flow_Fork_K7">
+        <di:waypoint x="475" y="2135" />
+        <di:waypoint x="150" y="2135" />
+        <di:waypoint x="150" y="2210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Fork_Agr" bpmnElement="Flow_Fork_Agr">
+        <di:waypoint x="483" y="2160" />
+        <di:waypoint x="370" y="2160" />
+        <di:waypoint x="370" y="2210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Fork_Stat" bpmnElement="Flow_Fork_Stat">
+        <di:waypoint x="517" y="2160" />
+        <di:waypoint x="600" y="2160" />
+        <di:waypoint x="600" y="2210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Fork_Wykres" bpmnElement="Flow_Fork_Wykres">
+        <di:waypoint x="525" y="2135" />
+        <di:waypoint x="830" y="2135" />
+        <di:waypoint x="830" y="2210" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Agregacja → LiczbaKategorii (w dół) -->
+      <bpmndi:BPMNEdge id="Edge_Agr_LK" bpmnElement="Flow_Agr_LK">
+        <di:waypoint x="370" y="2270" />
+        <di:waypoint x="370" y="2320" />
+      </bpmndi:BPMNEdge>
+      <!-- Agregacja → DashboardCalc -->
+      <bpmndi:BPMNEdge id="Edge_Agr_Dash" bpmnElement="Flow_Agr_Dash">
+        <di:waypoint x="460" y="2260" />
+        <di:waypoint x="460" y="2290" />
+        <di:waypoint x="730" y="2290" />
+        <di:waypoint x="730" y="2320" />
+      </bpmndi:BPMNEdge>
+      <!-- DaneWykresu → DashboardCalc -->
+      <bpmndi:BPMNEdge id="Edge_Wykres_Dash" bpmnElement="Flow_Wykres_Dash">
+        <di:waypoint x="830" y="2270" />
+        <di:waypoint x="830" y="2290" />
+        <di:waypoint x="780" y="2290" />
+        <di:waypoint x="780" y="2320" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Gałęzie → Join -->
+      <bpmndi:BPMNEdge id="Edge_K7_Join" bpmnElement="Flow_K7_Join">
+        <di:waypoint x="150" y="2270" />
+        <di:waypoint x="150" y="2465" />
+        <di:waypoint x="475" y="2465" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_LK_Join" bpmnElement="Flow_LK_Join">
+        <di:waypoint x="370" y="2380" />
+        <di:waypoint x="370" y="2465" />
+        <di:waypoint x="475" y="2465" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Stat_Join" bpmnElement="Flow_Stat_Join">
+        <di:waypoint x="600" y="2270" />
+        <di:waypoint x="600" y="2465" />
+        <di:waypoint x="525" y="2465" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Dash_Join" bpmnElement="Flow_Dash_Join">
+        <di:waypoint x="730" y="2380" />
+        <di:waypoint x="730" y="2465" />
+        <di:waypoint x="525" y="2465" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Faza 5: Join → Render → Loop back -->
+      <bpmndi:BPMNEdge id="Edge_Join_Render" bpmnElement="Flow_Join_Render">
+        <di:waypoint x="500" y="2490" />
+        <di:waypoint x="500" y="2540" />
+      </bpmndi:BPMNEdge>
+      <!-- Pętla zwrotna: RenderUI → UserActionGw (po lewej stronie) -->
+      <bpmndi:BPMNEdge id="Edge_Loop_Back" bpmnElement="Flow_Loop_Back">
+        <di:waypoint x="400" y="2580" />
+        <di:waypoint x="60" y="2580" />
+        <di:waypoint x="60" y="1045" />
+        <di:waypoint x="475" y="1045" />
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>

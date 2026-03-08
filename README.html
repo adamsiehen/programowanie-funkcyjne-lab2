@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<p><img src="./images/image-9.png" alt="WSB"></p>
+<h1 id="autor">Autor:</h1>
+<p>Adam Sieheń</p>
+<p>Nr albumu: 38242</p>
+<p>WSB Merito Gdańsk</p>
+<p>Przedmiot: Programowanie funkcyjne w ramach różnic programowych</p>
+<h1 id="analizator-wydatk%C3%B3w-osobistych--zadanie-2">Analizator wydatków osobistych — Zadanie 2</h1>
+<p>Aplikacja React, w której <strong>logika przetwarzania danych jest realizowana w czystych funkcjach</strong> zgodnie z zasadami programowania funkcyjnego, natomiast React pełni rolę <strong>shell'a</strong> zarządzającego stanem, routingiem i interakcją z użytkownikiem.</p>
+<p>Autor: Adam Sieheń</p>
+<hr>
+<h2 id="realizacja-wymaga%C5%84-z-polecenia-1%E2%80%9310">Realizacja wymagań z polecenia (1–10)</h2>
+<h3 id="1-%C5%BAr%C3%B3d%C5%82o-danych--plik-json-pobierany-asynchronicznie">1. Źródło danych — plik JSON pobierany asynchronicznie</h3>
+<p>Dane wydatków znajdują się w pliku <code>public/wydatki.json</code>. Po uruchomieniu aplikacji <code>App.jsx</code> pobiera je asynchronicznie przez <code>fetch()</code> z użyciem <code>AbortController</code> (obsługa anulowania). Następnie dane są:</p>
+<ul>
+<li>parsowane (<code>response.json()</code>),</li>
+<li>walidowane (sprawdzenie czy wynik jest tablicą),</li>
+<li>normalizowane funkcją <code>normalizujWydatek</code> (uzupełnianie brakujących pól, rzutowanie typów),</li>
+<li>opcjonalnie scalane z danymi użytkownika zapisanymi w <code>localStorage</code>.</li>
+</ul>
+<h3 id="2-pipeline-funkcyjny-12-czystych-funkcji">2. Pipeline funkcyjny (12 czystych funkcji)</h3>
+<p>Plik <code>src/utils/pipelineWydatkow.js</code> zawiera pipeline złożony z <strong>12 eksportowanych czystych funkcji</strong>. Żadna z nich nie modyfikuje danych wejściowych — każda zwraca nową tablicę lub obiekt.</p>
+<p><strong>Sekwencja kroków pipeline (<code>uruchomPipelineWydatkow</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Krok</th>
+<th>Funkcja</th>
+<th>Rola</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>filtrujPoNazwie</code></td>
+<td>Filtrowanie po fragmencie nazwy (case-insensitive)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>filtrujPoKategorii</code></td>
+<td>Filtrowanie po kategorii</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>filtrujPoMetodziePlatnosci</code></td>
+<td>Filtrowanie po metodzie płatności</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>filtrujPoZakresieKwot</code></td>
+<td>Filtrowanie po zakresie kwot (min/max)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>filtrujPoZakresieDat</code></td>
+<td>Filtrowanie po zakresie dat</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>sortujWydatki</code></td>
+<td>Sortowanie po wybranym polu i kierunku</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>mapujDoWidoku</code></td>
+<td>Mapowanie na format prezentacyjny</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>agregujPoKategorii</code></td>
+<td>Agregacja sum w podziale na kategorie (reduce)</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>obliczStatystyki</code></td>
+<td>Statystyki: suma, średnia, min, max, liczba pozycji</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>przygotujDaneDoWykresu</code></td>
+<td>Dane do wykresu słupkowego (reduce → map)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>obliczLiczbeKategorii</code> / <code>obliczNajwiekszaKategorie</code></td>
+<td>Metryki kategorii</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>obliczDaneDashboardu</code></td>
+<td>Kompozycja danych dashboardu z wyników kroków 8–11</td>
+</tr>
+</tbody>
+</table>
+<p>Każda funkcja jest <strong>czysta</strong>: przyjmuje dane, zwraca nowy wynik, nie powoduje efektów ubocznych.</p>
+<h3 id="3-dynamiczne-filtry">3. Dynamiczne filtry</h3>
+<p>Komponent <code>PanelFiltrow</code> (<code>src/MyComponents/AnalizatorWydatkow/PanelFiltrow.js</code>) udostępnia 6 filtrów:</p>
+<table>
+<thead>
+<tr>
+<th>Filtr</th>
+<th>Typ kontrolki</th>
+<th>Parametr URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wyszukiwanie po nazwie</td>
+<td>TextField</td>
+<td><code>nazwa</code></td>
+</tr>
+<tr>
+<td>Kategoria</td>
+<td>Select (Wszystkie / Jedzenie / Transport / …)</td>
+<td><code>kategoria</code></td>
+</tr>
+<tr>
+<td>Metoda płatności</td>
+<td>Select (Wszystkie / Karta / Gotówka / Online)</td>
+<td><code>metodaPlatnosci</code></td>
+</tr>
+<tr>
+<td>Minimalna kwota</td>
+<td>TextField (number)</td>
+<td><code>minKwota</code></td>
+</tr>
+<tr>
+<td>Maksymalna kwota</td>
+<td>TextField (number)</td>
+<td><code>maxKwota</code></td>
+</tr>
+<tr>
+<td>Sortowanie</td>
+<td>Select (data / kwota / nazwa)</td>
+<td><code>sortowanie</code></td>
+</tr>
+</tbody>
+</table>
+<p>Zmiana dowolnego filtra powoduje automatyczne przeliczenie pipeline przez <code>useMemo</code>.
+Przycisk <strong>Resetuj filtry</strong> przywraca wartości domyślne (<code>FILTRY_POCZATKOWE</code>).</p>
+<h3 id="4-podzia%C5%82-na-komponenty">4. Podział na komponenty</h3>
+<p>Aplikacja składa się z następujących komponentów:</p>
+<table>
+<thead>
+<tr>
+<th>Komponent</th>
+<th>Plik</th>
+<th>Rola</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Filters</strong></td>
+<td><code>PanelFiltrow.js</code></td>
+<td>Panel filtrów i sortowania</td>
+</tr>
+<tr>
+<td><strong>Results</strong></td>
+<td><code>WynikiWydatkow.jsx</code></td>
+<td>Tabela wyników (lista wydatków)</td>
+</tr>
+<tr>
+<td><strong>Stats</strong></td>
+<td><code>StatystykiWydatkow.jsx</code></td>
+<td>Statystyki (suma, średnia, min, max, kategorie)</td>
+</tr>
+<tr>
+<td><strong>Chart</strong></td>
+<td><code>WykresWydatkow.jsx</code></td>
+<td>Wykres słupkowy (Recharts)</td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td><code>Dashboard.jsx</code></td>
+<td>Podsumowanie z mini-wykresem</td>
+</tr>
+<tr>
+<td>Nawigacja</td>
+<td><code>Nawigacja.jsx</code></td>
+<td>Pasek nawigacji (linki do widoków)</td>
+</tr>
+<tr>
+<td>Dodawanie wydatku</td>
+<td><code>PanelDodawaniaWydatku.js</code></td>
+<td>Formularz dodawania nowego wydatku</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-komunikacja-mi%C4%99dzy-komponentami--propsy-i-callbacki">5. Komunikacja między komponentami — propsy i callbacki</h3>
+<p><code>App.jsx</code> (shell) zarządza całym stanem aplikacji i przekazuje go w dół drzewa komponentów:</p>
+<ul>
+<li><strong>Props w dół:</strong> <code>App</code> → widoki (<code>WidokWydatki</code>, <code>WidokStatystyki</code>, …) → komponenty prezentacyjne — dane do wyświetlenia (<code>wydatki</code>, <code>statystyki</code>, <code>daneWykresu</code>, <code>filtry</code>, <code>kategorie</code>, <code>metodyPlatnosci</code>).</li>
+<li><strong>Callbacki w górę:</strong> komponenty powiadamiają <code>App</code> o akcjach użytkownika:
+<ul>
+<li><code>onZmianaFiltru(nazwaPola, wartosc)</code> — zmiana jednego pola filtra,</li>
+<li><code>onResetujFiltry()</code> — przywrócenie filtrów domyślnych,</li>
+<li><code>onDodajWydatek(nowyWydatek)</code> — dodanie nowego wydatku do listy,</li>
+<li><code>onResetujFabryczne()</code> — przywrócenie danych fabrycznych z JSON.</li>
+</ul>
+</li>
+</ul>
+<h3 id="6-routing--react-router-v6">6. Routing — React Router v6</h3>
+<p>Konfiguracja tras znajduje się w <code>src/routing/konfiguracjaTras.js</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Ścieżka</th>
+<th>Widok</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td><code>WidokDashboard</code></td>
+<td>Strona główna z podsumowaniem</td>
+</tr>
+<tr>
+<td><code>/wydatki</code></td>
+<td><code>WidokWydatki</code></td>
+<td>Lista wydatków z filtrami</td>
+</tr>
+<tr>
+<td><code>/kategoria/:kategoria</code></td>
+<td><code>WidokWydatki</code></td>
+<td>Wydatki z predefiniowaną kategorią z URL</td>
+</tr>
+<tr>
+<td><code>/statystyki</code></td>
+<td><code>WidokStatystyki</code></td>
+<td>Panel statystyk</td>
+</tr>
+<tr>
+<td><code>/wykres</code></td>
+<td><code>WidokWykres</code></td>
+<td>Wykres wydatków</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Synchronizacja filtrów z URL</strong> — komponent <code>SynchronizacjaFiltrowURL</code> zapewnia dwukierunkową synchronizację:</p>
+<ul>
+<li><strong>URL → State:</strong> po wejściu na np. <code>/wydatki?kategoria=Rozrywka&amp;minKwota=30</code> filtry ustawiają się automatycznie.</li>
+<li><strong>State → URL:</strong> zmiana filtra w UI natychmiast aktualizuje query string, np. <code>/wydatki?kategoria=Jedzenie&amp;metodaPlatnosci=Karta&amp;sortowanie=kwotaMalejaco</code>.</li>
+<li>Wartości domyślne (np. „Wszystkie&quot;, puste teksty) nie pojawiają się w URL — URL jest czytelny.</li>
+<li>Nawigacja na <code>/kategoria/Rozrywka</code> automatycznie ustawia filtr kategorii.</li>
+</ul>
+<h3 id="7-hooki-react">7. Hooki React</h3>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Użycie w <code>App.jsx</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>useState</code></td>
+<td>Stan wydatków (<code>listaWydatkow</code>), filtrów (<code>filtry</code>), ładowania (<code>czyLadowanie</code>), błędu (<code>bladLadowania</code>), danych fabrycznych (<code>daneFabryczne</code>)</td>
+</tr>
+<tr>
+<td><code>useEffect</code></td>
+<td>Pobieranie danych z JSON (z <code>AbortController</code>), zapis do <code>localStorage</code>, synchronizacja URL ↔ filtrów (3 efekty w <code>SynchronizacjaFiltrowURL</code>)</td>
+</tr>
+<tr>
+<td><code>useMemo</code></td>
+<td>Wywołanie <code>uruchomPipelineWydatkow</code> — pipeline przelicza się <strong>wyłącznie</strong> gdy zmienią się dane lub filtry. Również: <code>dostepneKategorie</code> i <code>dostepneMetodyPlatnosci</code></td>
+</tr>
+<tr>
+<td><code>useCallback</code></td>
+<td>Stabilne referencje callbacków: <code>obsluzZmianeFiltru</code>, <code>ustawFiltryZUrl</code>, <code>obsluzDodanieWydatku</code>, <code>obsluzResetFiltrow</code>, <code>przywrocDaneFabryczne</code></td>
+</tr>
+<tr>
+<td><code>useRef</code></td>
+<td>Zapobieganie nieskończonej pętli URL ↔ State (referencja <code>filtryRef</code> + flaga <code>pierwszyRender</code>)</td>
+</tr>
+<tr>
+<td><code>useLocation</code>, <code>useMatch</code>, <code>useSearchParams</code></td>
+<td>Odczyt i zapis parametrów URL (React Router)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-wykres-aktualizowany-dynamicznie">8. Wykres aktualizowany dynamicznie</h3>
+<p>Komponent <code>WykresWydatkow</code> renderuje wykres słupkowy za pomocą biblioteki <strong>Recharts</strong>. Dane do wykresu (<code>daneWykresu</code>) są obliczane przez czystą funkcję <code>przygotujDaneDoWykresu</code> w ramach pipeline — każda zmiana filtrów lub sortowania powoduje przeliczenie <code>useMemo</code> i automatyczną aktualizację wykresu.</p>
+<h3 id="9-czytelny-i-interaktywny-interfejs">9. Czytelny i interaktywny interfejs</h3>
+<ul>
+<li>Biblioteka komponentów: <strong>Material UI</strong> (<code>@mui/material</code>).</li>
+<li>Wyniki wyświetlane w tabeli (<code>WynikiWydatkow</code>) z kolumnami: Nazwa, Kategoria, Kwota, Metoda płatności, Data.</li>
+<li>Kategorie wyróżnione kolorowym chipem.</li>
+<li>Filtry reagują na zmiany użytkownika w czasie rzeczywistym — bez przycisku „Szukaj&quot;.</li>
+<li>Parametry URL odzwierciedlają aktualny stan filtrów — można kopiować / udostępniać link z konkretnymi filtrami.</li>
+<li>Responsywna nawigacja między widokami (Dashboard, Wydatki, Statystyki, Wykres).</li>
+</ul>
+<hr>
+<h2 id="architektura-react-jako-shell--logika-funkcyjna">Architektura: React jako shell + logika funkcyjna</h2>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────┐
+│                    App.jsx (SHELL)                      │
+│  useState / useEffect / useCallback / useRef            │
+│  Routing (BrowserRouter, Routes, SynchronizacjaFiltrow) │
+│  fetch() → localStorage → setListaWydatkow              │
+├─────────────────────────────────────────────────────────┤
+│                useMemo ──▶ Pipeline					 |
+│                                                         │
+│   dane + filtry ──▶ uruchomPipelineWydatkow() ──▶ wynik│
+├─────────────────────────────────────────────────────────┤
+│          Komponenty prezentacyjne (props only)          │
+│  PanelFiltrow │ WynikiWydatkow │ Statystyki │ Wykres    │
+└─────────────────────────────────────────────────────────┘
+</div></code></pre>
+<ul>
+<li><strong>Shell (<code>App.jsx</code>)</strong> — zarządza stanem, routingiem, efektami ubocznymi (fetch, localStorage, URL).</li>
+<li><strong>Logika funkcyjna (<code>pipelineWydatkow.js</code>)</strong> — 12 czystych funkcji, zero efektów ubocznych, łatwe do testowania i komponowania.</li>
+<li><strong>Komponenty widokowe</strong> — otrzymują gotowe dane przez propsy i renderują wynik; nie zawierają logiki biznesowej.</li>
+</ul>
+<h3 id="dlaczego-programowanie-funkcyjne-jest-rdzeniem-logiki">Dlaczego programowanie funkcyjne jest rdzeniem logiki?</h3>
+<ol>
+<li><strong>Deterministyczność</strong> — przy tych samych danych i filtrach pipeline zawsze zwróci ten sam wynik. Ułatwia to testowanie i debugowanie.</li>
+<li><strong>Niemutowalność</strong> — każda funkcja tworzy nowe struktury zamiast modyfikować istniejące. Eliminuje to błędy związane z nieoczekiwanymi mutacjami stanu.</li>
+<li><strong>Kompozycja</strong> — pipeline to sekwencja prostych funkcji składanych w łańcuch (<code>krok1 → krok2 → … → krok12</code>). Łatwo dodać lub usunąć krok bez wpływu na resztę.</li>
+<li><strong>Separacja warstw</strong> — czyste funkcje nie wiedzą nic o React, DOM czy URL. React pełni rolę shell'a, który dostarcza dane do pipeline i wyświetla wyniki.</li>
+<li><strong>Optymalizacja</strong> — dzięki czystości funkcji React może bezpiecznie cache'ować wyniki przez <code>useMemo</code>, przeliczając pipeline tylko wtedy, gdy zmienią się dane wejściowe.</li>
+</ol>
+<hr>
+<h2 id="pipeline--przep%C5%82yw-danych">Pipeline — przepływ danych</h2>
+<pre class="hljs"><code><div>Wejście: dane (JSON) + filtry (stan React)
+    │
+    ├─▶ filtrujPoNazwie
+    ├─▶ filtrujPoKategorii
+    ├─▶ filtrujPoMetodziePlatnosci
+    ├─▶ filtrujPoZakresieKwot
+    ├─▶ filtrujPoZakresieDat
+    ├─▶ sortujWydatki
+    │
+    ├─▶ mapujDoWidoku ──────────▶ wydatkiDoWidoku (tabela)
+    ├─▶ agregujPoKategorii ─────▶ agregatyKategorii
+    ├─▶ obliczStatystyki ───────▶ statystyki
+    ├─▶ przygotujDaneDoWykresu ─▶ daneWykresu (wykres)
+    └─▶ obliczDaneDashboardu ───▶ dashboard
+</div></code></pre>
+<h3 id="diagram-bpmn-pipelinea">Diagram BPMN pipeline'a</h3>
+<p><img src="./pipeline-wydatkow.svg" alt="Diagram pipeline przetwarzania wydatków"></p>
+<p>Diagram przedstawia pełny przepływ danych w 5 fazach:</p>
+<ol>
+<li><strong>Ładowanie JSON</strong> — <code>fetch(wydatki.json)</code> → parsowanie → walidacja → normalizacja,</li>
+<li><strong>Merge z localStorage</strong> — sprawdzenie czy istnieją zapisane dane użytkownika,</li>
+<li><strong>Interakcja użytkownika</strong> — zmiana filtrów / dodanie wydatku / reset fabryczny,</li>
+<li><strong>Pipeline funkcyjny</strong> — sekwencyjne filtrowanie i sortowanie, następnie równoległe obliczenia (mapowanie, agregacja, statystyki, dane wykresu, dashboard),</li>
+<li><strong>Renderowanie UI</strong> — wyświetlenie wyników w widokach React z pętlą zwrotną do akcji użytkownika.</li>
+</ol>
+<p>Źródło: <a href="pipeline-wydatkow.bpmn"><code>pipeline-wydatkow.bpmn</code></a> (edytowalny w bpmn.io).</p>
+<hr>
+<h2 id="struktura-projektu">Struktura projektu</h2>
+<pre class="hljs"><code><div>myapp/
+├── public/
+│   └── wydatki.json                  ← dane wejściowe (JSON)
+├── src/
+│   ├── App.jsx                       ← shell (stan, routing, efekty)
+│   ├── App.css                       ← style
+│   ├── utils/
+│   │   ├── pipelineWydatkow.js       ← 12 czystych funkcji pipeline
+│   │   └── funkcjeWydatkow.js        ← dodatkowe funkcje pomocnicze
+│   ├── MyComponents/
+│   │   ├── Nawigacja.jsx             ← pasek nawigacji
+│   │   ├── Dashboard.jsx             ← widok dashboardu
+│   │   ├── WynikiWydatkow.jsx        ← tabela wyników
+│   │   ├── StatystykiWydatkow.jsx    ← panel statystyk
+│   │   ├── WykresWydatkow.jsx        ← wykres (Recharts)
+│   │   └── AnalizatorWydatkow/
+│   │       ├── PanelFiltrow.js       ← filtry i sortowanie
+│   │       └── PanelDodawaniaWydatku.js ← formularz dodawania
+│   ├── widoki/
+│   │   ├── WidokDashboard.jsx
+│   │   ├── WidokWydatki.jsx
+│   │   ├── WidokStatystyki.jsx
+│   │   └── WidokWykres.jsx
+│   └── routing/
+│       └── konfiguracjaTras.js       ← konfiguracja React Router
+└── package.json
+</div></code></pre>
+<h2 id="uruchomienie">Uruchomienie</h2>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> myapp
+npm install
+npm start
+</div></code></pre>
+<p>Aplikacja uruchomi się pod adresem <code>http://localhost:3000</code>.</p>
+<hr>
+<h2 id="zrzuty-ekranu">Zrzuty ekranu</h2>
+<p><strong>Tabela wyników przed filtrowaniem:</strong>
+<img src="./images/image-8.png" alt="Tabela wyników przed filtrowaniem">
+<strong>Tabela wyników po filtrowaniu:</strong>
+<img src="./images/image.png" alt="Tabela wyników"></p>
+<p><strong>Panel statystyk:</strong>
+<img src="./images/image-1.png" alt="Statystyki 1">
+<img src="./images/image-2.png" alt="Statystyki 2">
+<img src="./images/image-3.png" alt="Statystyki 3"></p>
+<p><strong>Wykres wydatków:</strong>
+<img src="./images/image-4.png" alt="Wykres 1">
+<img src="./images/image-5.png" alt="Wykres 2"></p>
+<p><strong>Dashboard:</strong>
+<img src="./images/image-6.png" alt="Dashboard 1">
+<img src="./images/image-7.png" alt="Dashboard 2"></p>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+[
+  { "id": 1, "nazwa": "Zakupy spożywcze Biedronka", "kategoria": "Jedzenie", "kwota": 138.45, "metodaPlatnosci": "Karta", "data": "2026-02-01" },
+  { "id": 2, "nazwa": "Obiad w barze mlecznym", "kategoria": "Jedzenie", "kwota": 32.5, "metodaPlatnosci": "Gotówka", "data": "2026-02-02" },
+  { "id": 3, "nazwa": "Kawa i kanapka", "kategoria": "Jedzenie", "kwota": 21.9, "metodaPlatnosci": "Karta", "data": "2026-02-04" },
+  { "id": 4, "nazwa": "Dostawa pizzy", "kategoria": "Jedzenie", "kwota": 64.0, "metodaPlatnosci": "Online", "data": "2026-02-09" },
+  { "id": 5, "nazwa": "Zakupy warzyw na targu", "kategoria": "Jedzenie", "kwota": 47.2, "metodaPlatnosci": "Gotówka", "data": "2026-02-14" },
+
+  { "id": 6, "nazwa": "Bilet miesięczny komunikacji", "kategoria": "Transport", "kwota": 159.0, "metodaPlatnosci": "Online", "data": "2026-02-01" },
+  { "id": 7, "nazwa": "Tankowanie samochodu", "kategoria": "Transport", "kwota": 312.8, "metodaPlatnosci": "Karta", "data": "2026-02-06" },
+  { "id": 8, "nazwa": "Przejazd taksówką", "kategoria": "Transport", "kwota": 38.4, "metodaPlatnosci": "Online", "data": "2026-02-11" },
+  { "id": 9, "nazwa": "Myjnia automatyczna", "kategoria": "Transport", "kwota": 29.0, "metodaPlatnosci": "Gotówka", "data": "2026-02-15" },
+  { "id": 10, "nazwa": "Dopompowanie i serwis roweru", "kategoria": "Transport", "kwota": 76.0, "metodaPlatnosci": "Karta", "data": "2026-02-20" },
+
+  { "id": 11, "nazwa": "Kino z przyjaciółmi", "kategoria": "Rozrywka", "kwota": 58.0, "metodaPlatnosci": "Karta", "data": "2026-02-03" },
+  { "id": 12, "nazwa": "Subskrypcja Spotify", "kategoria": "Rozrywka", "kwota": 29.99, "metodaPlatnosci": "Online", "data": "2026-02-05" },
+  { "id": 13, "nazwa": "Bilard", "kategoria": "Rozrywka", "kwota": 45.0, "metodaPlatnosci": "Gotówka", "data": "2026-02-12" },
+  { "id": 14, "nazwa": "Bilet na koncert", "kategoria": "Rozrywka", "kwota": 189.0, "metodaPlatnosci": "Online", "data": "2026-02-18" },
+  { "id": 15, "nazwa": "Gra planszowa", "kategoria": "Rozrywka", "kwota": 119.9, "metodaPlatnosci": "Karta", "data": "2026-02-22" },
+
+  { "id": 16, "nazwa": "Czynsz", "kategoria": "Rachunki", "kwota": 1250.0, "metodaPlatnosci": "Online", "data": "2026-02-01" },
+  { "id": 17, "nazwa": "Rachunek za prąd", "kategoria": "Rachunki", "kwota": 231.6, "metodaPlatnosci": "Online", "data": "2026-02-07" },
+  { "id": 18, "nazwa": "Internet światłowodowy", "kategoria": "Rachunki", "kwota": 89.99, "metodaPlatnosci": "Karta", "data": "2026-02-08" },
+  { "id": 19, "nazwa": "Opłata za wodę", "kategoria": "Rachunki", "kwota": 78.3, "metodaPlatnosci": "Online", "data": "2026-02-17" },
+  { "id": 20, "nazwa": "Opłata za gaz", "kategoria": "Rachunki", "kwota": 154.2, "metodaPlatnosci": "Karta", "data": "2026-02-24" },
+
+  { "id": 21, "nazwa": "Koszulka sportowa", "kategoria": "Zakupy", "kwota": 89.0, "metodaPlatnosci": "Karta", "data": "2026-02-10" },
+  { "id": 22, "nazwa": "Buty do biegania", "kategoria": "Zakupy", "kwota": 349.0, "metodaPlatnosci": "Online", "data": "2026-02-13" },
+  { "id": 23, "nazwa": "Zeszyty i długopisy", "kategoria": "Zakupy", "kwota": 36.8, "metodaPlatnosci": "Gotówka", "data": "2026-02-16" },
+  { "id": 24, "nazwa": "Słuchawki bezprzewodowe", "kategoria": "Zakupy", "kwota": 259.99, "metodaPlatnosci": "Online", "data": "2026-02-21" },
+  { "id": 25, "nazwa": "Kosmetyki pielęgnacyjne", "kategoria": "Zakupy", "kwota": 112.4, "metodaPlatnosci": "Karta", "data": "2026-02-25" },
+
+  { "id": 26, "nazwa": "Wizyta u dentysty", "kategoria": "Zdrowie", "kwota": 240.0, "metodaPlatnosci": "Karta", "data": "2026-02-05" },
+  { "id": 27, "nazwa": "Leki w aptece", "kategoria": "Zdrowie", "kwota": 67.3, "metodaPlatnosci": "Gotówka", "data": "2026-02-09" },
+  { "id": 28, "nazwa": "Badania laboratoryjne", "kategoria": "Zdrowie", "kwota": 189.5, "metodaPlatnosci": "Online", "data": "2026-02-19" },
+  { "id": 29, "nazwa": "Suplementy diety", "kategoria": "Zdrowie", "kwota": 94.9, "metodaPlatnosci": "Karta", "data": "2026-02-23" },
+  { "id": 30, "nazwa": "Konsultacja fizjoterapeutyczna", "kategoria": "Zdrowie", "kwota": 160.0, "metodaPlatnosci": "Online", "data": "2026-02-27" }
+]
